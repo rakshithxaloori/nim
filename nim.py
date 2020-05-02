@@ -121,8 +121,10 @@ class NimAI():
         """
         # Get the old Q-value estimate
         old_value_estimate = old_q
+
         # The new Q-value estimate would be current reward and potential future rewards
         new_value_estimate = reward + future_rewards
+
         # Apply the formula
         updated_q_value = old_value_estimate + \
             (self.alpha) * (new_value_estimate - old_value_estimate)
@@ -138,7 +140,33 @@ class NimAI():
         Q-value in `self.q`. If there are no available actions in
         `state`, return 0.
         """
-        raise NotImplementedError
+        action_q_value = dict()
+        actions = set()
+        # Get all the actions available
+        for i, pile in enumerate(state):
+            for j in range(1, pile+1):
+                actions.add((i, j))
+
+        # No actions are available
+        if len(actions) == 0:
+            return 0
+
+        # Check the q-value for each action
+        maxAction = None
+        for action in actions:
+            q_value = self.get_q_value(state, action)
+
+            # Initialize
+            if maxAction is None:
+                maxAction = (action, q_value)
+
+            # Better future action found
+            if maxAction[1] < q_value:
+                # Update the maxAction
+                maxAction = (action, q_value)
+
+        # Return the action that has best Q-value
+        return maxAction[1]
 
     def choose_action(self, state, epsilon=True):
         """
