@@ -165,7 +165,7 @@ class NimAI():
                 # Update the maxAction
                 maxAction = (action, q_value)
 
-        # Return the action that has best Q-value
+        # Return the best Q-value
         return maxAction[1]
 
     def choose_action(self, state, epsilon=True):
@@ -183,7 +183,39 @@ class NimAI():
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
         """
-        raise NotImplementedError
+        actions = set()
+        # Get all the actions available
+        for i, pile in enumerate(state):
+            for j in range(1, pile+1):
+                actions.add((i, j))
+
+        choose_random = random.choices(population=[True, False], weights=[
+                                       self.epsilon, (1-self.epsilon)])
+        returnAction = None
+        if epsilon is False or not choose_random:
+            # Choose the best action available
+            # Check the q-value for each action
+            maxAction = None
+            for action in actions:
+                q_value = self.get_q_value(state, action)
+
+                # Initialize
+                if maxAction is None:
+                    maxAction = (action, q_value)
+
+                # Better future action found
+                if maxAction[1] < q_value:
+                    # Update the maxAction
+                    maxAction = (action, q_value)
+
+            # The action with the highest Q-value
+            returnAction = maxAction[0]
+
+        else:
+            # Choose a random action
+            returnAction = random.choice(actions)
+
+        return returnAction
 
 
 def train(n):
